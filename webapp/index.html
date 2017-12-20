@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+
+.button {
+    /*background-color: #008CBA;*/ /* blue */
+    background-color:#32CD32;
+    border: 10;
+    border-radius: 10px;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+/*.button:hover {background-color: #000080}
+.button:active {
+  background-color: #000080;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}*/
+
+/*.button2 {background-color: #4CAF50;}*/ 
+.button2 {background-color:#ff0000;}
+/*.button2:hover {background-color: #3e8e41}
+.button2:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+.button3 {background-color: #f44336;} 
+.button3:hover {background-color: #B22222}
+.button3:active {
+  background-color: #B22222;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}*/
+
+/*.button4 {background-color: #e7e7e7; color: black;} 
+.button5 {background-color: #555555;} */
+</style>
+<!-- 
+<script src='js/lib/highlight.pack.js'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.min.js' charset='utf-8'></script> -->
+<!-- <script src='../dist/metricsgraphics.min.js'></script> -->
+<script src="http://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+</head>
+<body>
+
+<button class="button" onclick="on_led4()">ON RED LED</button>
+<button class="button button2" onclick="off_led4()">OFF RED LED</button>
+<!-- <button class="button button3">Red</button> -->
+<!-- <button class="button button4">4</button> -->
+<!-- <button class="button button5">5</button> -->
+<!-- 
+<canvas id="myChart" width="400" height="400"></canvas>
+ -->
+<br>
+<br>
+<div id="chartContainer" style="height: 300px; width: 100%;">
+
+</body>
+<script type="text/javascript">
+
+var json_obj = [];
+
+function pop_json(currentdate,status) {
+  item = {};
+  item ["x"] = currentdate;
+  item ["y"] = status;
+  json_obj.push(item);
+}
+
+function on_led4() {
+    var data = JSON.stringify({
+      "command": "on"
+    });
+
+    console.log("ON request set");
+
+    var xhr = new XMLHttpRequest();
+    // xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+    if (this.readyState === 4) {
+        
+      console.log(this.responseText);
+      var resp = JSON.parse(this.responseText);
+      console.log(resp.status);
+
+      var currentdate = new Date(resp.time);
+      console.log(currentdate);
+
+      pop_json(currentdate,resp.status);
+
+      var chart = new CanvasJS.Chart("chartContainer",
+      {
+
+        title:{
+        text: "LED Tracking"
+        },
+         data: [
+        {
+          type: "line",
+
+          dataPoints: json_obj
+        }
+        ]
+      });
+      chart.render();
+      }
+    });
+
+    xhr.open("POST","http://127.0.0.1:5000/rpiglow");
+    xhr.setRequestHeader("content-type", "application/json");
+    xhr.setRequestHeader("cache-control", "no-cache");
+    // xhr.setRequestHeader("postman-token", "421edd78-179c-2706-72f4-a7ee7d05a18c");
+    console.log("ON Request sent");
+    xhr.send(data);
+
+}
+
+function off_led4(){
+    var data = JSON.stringify({
+      "command": "off"
+    });
+
+    console.log("OFF request sent");
+
+    var xhr = new XMLHttpRequest();
+    // xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+      if (this.readyState === 4) {
+        
+      console.log(this.responseText);
+      var resp = JSON.parse(this.responseText);
+      console.log(resp.status);
+      var currentdate = new Date(resp.time);
+      console.log(currentdate);
+      
+      pop_json(currentdate,resp.status);
+
+      var chart = new CanvasJS.Chart("chartContainer",
+      {
+
+        title:{
+        text: "LED Tracking"
+        },
+         data: [
+        {
+          type: "line",
+
+          dataPoints: json_obj
+        }
+        ]
+      });
+      chart.render();
+      }
+    });
+
+    xhr.open("POST","http://127.0.0.1:5000/rpiglow");
+    xhr.setRequestHeader("content-type", "application/json");
+    xhr.setRequestHeader("cache-control", "no-cache");
+    // xhr.setRequestHeader("postman-token", "421edd78-179c-2706-72f4-a7ee7d05a18c");
+    console.log("OFF Request sent");
+    xhr.send(data);
+
+}
+
+</script>
+
+</html>
